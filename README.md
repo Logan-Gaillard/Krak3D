@@ -28,7 +28,7 @@ Suivez ces étapes pour construire le projet sur Ubuntu:
 1. Clonez le dépôt:
 
     ```bash
-    git clone https://github.com/Octokling/Krak3D.git
+    git clone https://github.com/Logan-Gaillard/Krak3D.git
     cd Krak3D
     ```
 
