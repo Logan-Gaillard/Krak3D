@@ -1,7 +1,17 @@
 all: linux
 
 linux:
-	@g++ main.cpp -o main -lglfw -lGLEW -lGL -lX11 -lpthread -lXrandr -lXi -ldl
+	mkdir -p builds/linux
+	cd builds/linux && cmake ../.. && make
+
+windows:
+
+	mkdir -p builds/windows
+	cd builds/windows && cmake ../.. -DCMAKE_TOOLCHAIN_FILE=../../toolchain.cmake && make
+
+run:
+	cd builds/linux && ./main
 
 clean:
-	@rm main
+	@rm -rf builds
+	@rm -rf build

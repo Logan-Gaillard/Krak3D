@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 //Inclut GLEW pour avoir les prototypes des fonctions OpenGL
+#define GLEW_STATIC
 #include <GL/glew.h>
 
 //Inclut GLFW qui est une bibliothèque de gestion de fenêtre
