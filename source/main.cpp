@@ -12,6 +12,10 @@
 #include <glm/glm.hpp>
 using namespace glm;
 
+
+//Les shaders
+#include "shaders/load.cpp"
+
 int main(){
 
     //Initialisation de GLFW
@@ -29,15 +33,13 @@ int main(){
 
     //Ouverture d'une fenêtre en 1920x1080
     GLFWwindow* window; //Pointeur vers la fenêtre
-    window = glfwCreateWindow(1920, 1080, "Krak3D", NULL, NULL); //Création de la fenêtre en 1920x1080 avec le titre "OpenGL"
-    /*
-    Les arguments de glfwCreateWindow sont :
-    - La largeur de la fenêtre
-    - La hauteur de la fenêtre
-    - Le titre de la fenêtre
-    - La fenêtre parent (NULL si on n'en a pas) sert à créer une fenêtre enfant
-    - La fenêtre partagée (NULL si on n'en a pas) sert à partager les ressources OpenGL entre plusieurs fenêtres
-    */
+    window = glfwCreateWindow( //Création de la fenêtre en 1920x1080 avec le titre "OpenGL"
+        1920, //La largeur de la fenêtre
+        1080, //La hauteur de la fenêtre
+        "Krak3D", //Le titre de la fenêtre
+        NULL, //La fenêtre parent (NULL si on n'en a pas) sert à créer une fenêtre enfant
+        NULL //La fenêtre partagée (NULL si on n'en a pas) sert à partager les ressources OpenGL entre plusieurs fenêtres
+    ); 
 
     if(window == NULL){ // Si la fenêtre n'a pas pu être créée
         fprintf(stderr, "Erreur lors de l'ouverture de la fenêtre\n"); // On affiche un message d'erreur dans la console
@@ -85,10 +87,14 @@ int main(){
         GL_STATIC_DRAW // On envoie les données une fois et on les utilise souvent
     );
 
+    GLuint programID = LoadShaders( "SimpleVertexShader.vxs", "SimpleFragmentShader.fts" );
+
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE); // On active le mode de saisie des touches
     do{
         // Clear the screen
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // On efface le tampon de couleur et le tampon de profondeur
+
+        glUseProgram(programID); // On utilise le programme
 
         //DESSINS
         glEnableVertexAttribArray(0); // Elle permet de dire à OpenGL que l'on va utiliser l'attribut 0

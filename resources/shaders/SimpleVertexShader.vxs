@@ -1,0 +1,16 @@
+#version 330 core
+
+//Déclare les données d'entrées
+layout(location = 0) in vec3 vtxPos_mdlSp;
+
+//layout(location = 0) indique l'emplacement de la variable de position du sommet dans le shader
+// in : indique que la variable est une entrée 
+// vec3 : indique que la variable est un vecteur de 3 (3D)
+// vtxPos_mdlSp : nom de la variable
+
+
+//Fonction appelée pour chaque sommet
+void main(){
+    gl_Position.xyz = vtxPos_mdlSp; //Position du sommet XYZ en fonction de la position du sommet dans l'espace modèle
+    gl_Position.w = 1.0; 
+}
