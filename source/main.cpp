@@ -50,7 +50,7 @@ int main(){
     glfwMakeContextCurrent(window); // On rend la fenêtre courante pour dessiner
     glewExperimental = true; // Nécessaire pour que GLEW fonctionne correctement
     if(glewInit() != GLEW_OK){ //Si l'initialisation de GLEW a échoué
-        fprintf(stderr, "Failed to initialize GLEW\n"); // On affiche un message d'erreur dans la console
+        fprintf(stderr, "Erreur lors l'initialisation de GLEW\n"); // On affiche un message d'erreur dans la console
         return -1; // On quitte le programme
     }
 
@@ -87,7 +87,7 @@ int main(){
         GL_STATIC_DRAW // On envoie les données une fois et on les utilise souvent
     );
 
-    GLuint programID = LoadShaders( "SimpleVertexShader.vxs", "SimpleFragmentShader.fts" );
+    GLuint programID = LoadShaders( "./shaders/SimpleVertexShader.vxs", "./shaders/SimpleFragmentShader.fts" );
 
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE); // On active le mode de saisie des touches
     do{
@@ -151,3 +151,38 @@ int main(){
     * = Pointeur vers la donnnée de la variable (ex : int* pointeur) | Une autre variable créé mais qui pointe vers la même donnée
     & = Référence de la variable (ex : int& reference) | Même variable mais avec un autre nom (On peut s'en servir pour modifier les valeurs de la variable)
 */
+
+
+
+
+/*
+LES COORDONNEES HOMOGENES :
+    En 3D nous utilisons X, Y et Z pour définir la position d'un point dans l'espace.
+    Cependant nous utilisons un 4ème paramètre : le W (ou w).
+    Ce paramètre est appelé coordonnée homogène.
+    Si w = 1, alors le vecteur (x, y, z, 1) est une position dans l’espace.
+    Si w = 0, alors le vecteur (x, y, z, 0) est un vecteur direction.
+
+LES MATRICES : 
+    Nous utilisons principelement des matrices le longueur 4x4 pour effectuer des transformations sur les objets en 3D.
+
+
+    Les matrices de translation :
+        La matrice correspond à cela :
+        | 1 0 0 x |
+        | 0 1 0 y |
+        | 0 0 1 z |
+        | 0 0 0 1 |
+        x, y, z sont les coordonnées actuelle de la translation. 1 correspond à w alors c'est une position dans l'espace.
+
+        Comment changer la position d'un objet ?
+        Il suffit de multiplier la matrice par les nouvelles coordonnées de l'objet.
+        Exemple notre object est à la position (12, 2, 5, 1) et on veut déplacer sur l'axe X de 6 unités.
+
+        | 1 0 0 6 |   | 12 |   | 18 |
+        | 0 1 0 0 | x | 2  | = | 2  |
+        | 0 0 1 0 |   | 5  |   | 5  |
+        | 0 0 0 1 |   | 1  |   | 1  |
+
+*/
+

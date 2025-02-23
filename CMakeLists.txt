@@ -42,6 +42,8 @@ if(WIN32)
         user32
         pthread
         opengl32
+        -static-libstdc++
+        -static-libgcc
     )
 endif()
 
