@@ -1,5 +1,6 @@
-# Krak3D
+# Krak3D (Nom optionnel)
 Moteur 3D sous OpenGL en cours de développement...
+Si vous avez des suggestions de noms, n'hesitez pas ;)
 
 Seul Octokling travail sur ce projet, veuillez l'excuser pour la fréquence des mises à jours
 
@@ -14,42 +15,46 @@ Assurez-vous d'avoir les éléments suivants installés sur votre système:
 - **OpenGL**: pour le rendu graphique.
 - **GLFW**: pour la gestion des fenêtres et des entrées.
 
-Vous pouvez installer ces dépendances avec les commandes suivantes:
-
-```bash
-sudo apt update
-sudo apt install git cmake gcc g++ make libgl1-mesa-dev libglfw3-dev
-```
-
-# Build
+# Installation
 
 Suivez ces étapes pour construire le projet sur Ubuntu:
 
 1. Clonez le dépôt:
 
-    ```bash
-    git clone https://github.com/Logan-Gaillard/Krak3D.git
-    cd Krak3D
-    ```
+        git clone https://github.com/Logan-Gaillard/Krak3D.git
+        cd Krak3D
 
-2. Construisez le projet avec Make:
 
-    ```bash
-    make 
-    ```
+2. Vous pouvez installer ces dépendances avec les commandes suivantes:
 
-    Vous pouvez également compiler le programme pour Windows
+    **Ubuntu/Debian**
 
-    ```bash
+        sudo apt update && sudo apt upgrade
+        sudo apt install cmake gcc g++ make libgl1-mesa-dev libglfw3-dev libglu1-mesa-dev libglm-dev libglew-dev libxi-dev
+
+    **Arch Linux**
+
+        sudo pacman -Syu
+        sudo pacman -S cmake gcc g++ make mesa glfw glu glm glew xi
+    
+
+# Compilation
+## Linux
+
+    make linux
+    
+
+## Windows
+
     make windows
-    ```
 
-3. Exécutez l'application:
+### NOTES
+Vous avez besoin du compilateur ``x86_64-w64-mingw32-gcc``
 
-    ```bash
-    ./main
-    ```
+Installez-le avec cette commande :
+    
+    sudo apt install gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64
 
 
 
-Et voilà! Vous avez construit et exécuté Krak3D sur Ubuntu.
+Et voilà! Vous savez construire et exécuter Krak3D sur Ubuntu.
