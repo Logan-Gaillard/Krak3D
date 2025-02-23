@@ -4,10 +4,12 @@ all: linux
 
 linux:
 	mkdir -p builds/linux
+	cp -r ./resources/* builds/linux
 	cd builds/linux && cmake ../.. && make
 
 windows:
 	mkdir -p builds/windows
+	cp -r ./resources/* builds/windows
 	cd builds/windows && cmake ../.. -DCMAKE_TOOLCHAIN_FILE=../../toolchain.cmake && make
 
 runl:
