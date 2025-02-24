@@ -109,6 +109,25 @@ int main(){
         GL_STATIC_DRAW // On envoie les données une fois et on les utilise souvent
     );
 
+    glm::mat4 proj = glm::perspective( // On crée une matrice de projection qui permet de faire la profondeur de champ
+        glm::radians(opts.fov), // L'angle de vue (FOV de 90°)
+        (float)opts.screenSize.x / (float)opts.screenSize.y, // Le ratio de la fenêtre
+        0.1f, // La distance de rendu la plus proche
+        opts.drawDistance // La distance de rendu la plus lointaine
+    );
+
+    glm::mat4 view = glm::lookAt(
+        cam.position, // La position de la caméra
+        cam.direction, // La direction où regarde la caméra
+        cam.up // Le haut de la caméra
+    );
+
+    glm::mat4 model = glm::mat4(1.0f); // On crée une matrice identité pour le modèle(le 1.0f est la taille de l'objet)
+
+    glm::mat4 mvp = proj * view * model; // On combine les trois matrices en une seule
+    //MVP = Projection, View et Model
+    
+
     GLuint programID = LoadShaders( "./shaders/SimpleVertexShader.vxs", "./shaders/SimpleFragmentShader.fts" );
 
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE); // On active le mode de saisie des touches
@@ -117,24 +136,6 @@ int main(){
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // On efface le tampon de couleur et le tampon de profondeur
 
         glUseProgram(programID); // On utilise le programme
-
-        glm::mat4 proj = glm::perspective( // On crée une matrice de projection qui permet de faire la profondeur de champ
-            glm::radians(opts.fov), // L'angle de vue (FOV de 90°)
-            (float)opts.screenSize.x / (float)opts.screenSize.y, // Le ratio de la fenêtre
-            0.1f, // La distance de rendu la plus proche
-            opts.drawDistance // La distance de rendu la plus lointaine
-        );
-
-        glm::mat4 view = glm::lookAt(
-            cam.position, // La position de la caméra
-            cam.direction, // La direction où regarde la caméra
-            cam.up // Le haut de la caméra
-        );
-
-        glm::mat4 model = glm::mat4(1.0f); // On crée une matrice identité pour le modèle(le 1.0f est la taille de l'objet)
-
-        glm::mat4 mvp = proj * view * model; // On combine les trois matrices en une seule
-        //MVP = Projection, View et Model
 
         GLuint matrixId = glGetUniformLocation(programID, "MVP"); // On récupère l'identifiant de la matrice MVP
         glUniformMatrix4fv( // On envoie la matrice MVP au shader
