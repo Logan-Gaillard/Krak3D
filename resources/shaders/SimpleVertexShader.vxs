@@ -8,9 +8,10 @@ layout(location = 0) in vec3 vtxPos_mdlSp;
 // vec3 : indique que la variable est un vecteur de 3 (3D)
 // vtxPos_mdlSp : nom de la variable
 
+uniform mat4 MVP; //Matrice de transformation
+
 
 //Fonction appelée pour chaque sommet
 void main(){
-    gl_Position.xyz = vtxPos_mdlSp; //Position du sommet XYZ en fonction de la position du sommet dans l'espace modèle
-    gl_Position.w = 1.0; 
+    gl_Position = MVP * vec4(vtxPos_mdlSp, 1.0); //Calcul de la position du sommet
 }

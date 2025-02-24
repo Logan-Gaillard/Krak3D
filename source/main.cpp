@@ -1,3 +1,5 @@
+#include <glm/ext/matrix_transform.hpp>
+#include <glm/ext/vector_float3_precision.hpp>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -10,8 +12,28 @@
 
 //Inclut GLM qui est une bibliothèque de gestion de matrice
 #include <glm/glm.hpp>
-using namespace glm;
+#include <glm/gtc/matrix_transform.hpp>
 
+using namespace glm;
+struct Options {
+    struct ScreenSize {
+        int x;
+        int y;
+    };
+
+    ScreenSize screenSize = {1920, 1080};
+    float drawDistance = 100.0f;
+    float fov = 90.0f;
+};
+
+struct camera {
+    glm::vec3 position = glm::vec3(3, 3, 1); //Position de la caméra
+    glm::vec3 direction = glm::vec3(0, 0, 0); //La direction où regarde la caméra
+    glm::vec3 up = vec3(0, 1, 0);
+};
+
+Options opts;
+camera cam;
 
 //Les shaders
 #include "shaders/load.cpp"
@@ -34,8 +56,8 @@ int main(){
     //Ouverture d'une fenêtre en 1920x1080
     GLFWwindow* window; //Pointeur vers la fenêtre
     window = glfwCreateWindow( //Création de la fenêtre en 1920x1080 avec le titre "OpenGL"
-        1920, //La largeur de la fenêtre
-        1080, //La hauteur de la fenêtre
+        opts.screenSize.x , //La largeur de la fenêtre
+        opts.screenSize.y, //La hauteur de la fenêtre
         "Krak3D", //Le titre de la fenêtre
         NULL, //La fenêtre parent (NULL si on n'en a pas) sert à créer une fenêtre enfant
         NULL //La fenêtre partagée (NULL si on n'en a pas) sert à partager les ressources OpenGL entre plusieurs fenêtres
@@ -95,6 +117,32 @@ int main(){
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // On efface le tampon de couleur et le tampon de profondeur
 
         glUseProgram(programID); // On utilise le programme
+
+        glm::mat4 proj = glm::perspective( // On crée une matrice de projection qui permet de faire la profondeur de champ
+            glm::radians(opts.fov), // L'angle de vue (FOV de 90°)
+            (float)opts.screenSize.x / (float)opts.screenSize.y, // Le ratio de la fenêtre
+            0.1f, // La distance de rendu la plus proche
+            opts.drawDistance // La distance de rendu la plus lointaine
+        );
+
+        glm::mat4 view = glm::lookAt(
+            cam.position, // La position de la caméra
+            cam.direction, // La direction où regarde la caméra
+            cam.up // Le haut de la caméra
+        );
+
+        glm::mat4 model = glm::mat4(1.0f); // On crée une matrice identité pour le modèle(le 1.0f est la taille de l'objet)
+
+        glm::mat4 mvp = proj * view * model; // On combine les trois matrices en une seule
+        //MVP = Projection, View et Model
+
+        GLuint matrixId = glGetUniformLocation(programID, "MVP"); // On récupère l'identifiant de la matrice MVP
+        glUniformMatrix4fv( // On envoie la matrice MVP au shader
+            matrixId,
+            1, // On envoie une seule matrice
+            GL_FALSE, // On ne transpose pas la matrice
+            &mvp[0][0] // On envoie la matrice (&mvp seul égale à toute la matrice si on fait notre premier [0] on obtiens la première ligne de la matrice et [0] de la première ligne)
+        );
 
         //DESSINS
         glEnableVertexAttribArray(0); // Elle permet de dire à OpenGL que l'on va utiliser l'attribut 0
@@ -184,5 +232,87 @@ LES MATRICES :
         | 0 0 1 0 |   | 5  |   | 5  |
         | 0 0 0 1 |   | 1  |   | 1  |
 
-*/
+        Les nouvelles coordonnées de l'objet sont (18, 2, 5, 1).
 
+        Qu'est ce que cela donne si W = 0 ?
+
+        | 1 0 0 6 |   | 0  |   | 0  |
+        | 0 1 0 0 | x | 2  | = | 2  |
+        | 0 0 1 0 |   | 5  |   | 5  |
+        | 0 0 0 1 |   | 0  |   | 0  |
+
+        La direction de l'objet est (0, 2, 5, 0).
+        Nous voyons qu'il me montre juste la direction de l'objet où il doit aller mais pas sa nouvelle position.
+    
+    Les matrices de mise à l'échelle
+        La matrice correspond à cela :
+        | x 0 0 0 |
+        | 0 y 0 0 |
+        | 0 0 z 0 |
+        | 0 0 0 1 |
+        x, y, z sont les facteurs de mise à l'échelle.
+
+        Comment redimensionner un objet ?
+        Il suffit de multiplier la matrice des tout les sommets par l'augmentation de la taille souhaité.
+        Exemple: notre object initial à un sommets de position 2, 0.5, 5 l'objets d'où il se trouve va être redimensionné en (4, 1, 10), on doit multifier TOUT les sommets par 2.
+
+        | 2 0 0 0 |   |  2  |   | 4  |
+        | 0 2 0 0 | x | 0.5 | = | 1  |
+        | 0 0 2 0 |   |  5  |   | 10 |
+        | 0 0 0 1 |   |  1  |   | 1  |
+
+        La nouvelle position dû au changement de la taille de l'objet est (4, 1, 10).
+
+    Les matrices de rotation
+        La matrice de rotation pour les X :
+        | 1    0       0       0 |
+        | 0    cos(a)  -sin(a) 0 |
+        | 0    sin(a)  cos(a)  0 |
+        | 0    0       0       1 |
+
+        La matrice de rotation pour les Y :
+        | cos(a)  0   sin(a)  0 |
+        | 0       1   0       0 |
+        | -sin(a) 0   cos(a)  0 |
+        | 0       0   0       1 |
+
+        La matrice de rotation pour les Z :
+        | cos(a)  -sin(a) 0   0 |
+        | sin(a)  cos(a)  0   0 |
+        | 0       0       1   0 |
+        | 0       0       0   1 |
+
+        a est l'angle de rotation en radians.
+
+        Comment faire tourner un objet ?
+        Il suffit de multiplier la matrice par les nouvelles coordonnées sur les sommets de l'objet.
+        Exemple: notre sommet est à la position (2, 0.5, 5) et on veut le tourner de 90° sur l'axe Y.
+
+        | cos(90)  0  sin(90)  0 |   | 2   |   | 5  |
+        | 0        1  0        0 | x | 0.5 | = | 0.5|
+        | -sin(90) 0  cos(90)  0 |   | 5   |   | 2  |
+        | 0        0  0        1 |   | 1   |   | 1  |
+
+        La nouvelle position du sommet est (5, 0.5, 2).
+        
+        CEPENDANT, pour la simplicité du code, nous utilisons la bibliothèque GLM qui permet de faire ces calculs plus facilement.
+
+        Combiner les transformations :
+        Nous pouvons au lieu de faire plusieurs traitement à la suite des autre, lui assigné une seule matrice qui va faire tout les traitements en même temps.
+
+        Voici la formule pour combiner les transformations :
+        VecteurTransformé = Translation * Rotation * MiseÀLÉchelle * VecteurInitial
+
+        !!!ATTENTION!!! L'ordre des transformations est important. (Mais n'est pas obligatoire d'être mis)
+        Si on change l'ordre des transformations, le résultat sera différent car l'ordinateur calculs de droite à gauche.
+
+        Cela permet de faire plusieurs transformations en une seule fois.
+        Exemple: notre sommet est à la position (2, 0.5, 5) et on veut le tourner de 90° sur l'axe Y et le déplacer de 6 unités sur l'axe X.
+
+        | cos(90)  0  sin(90)  0 |   | 1 0 0 6 |   | 2   |   | 5  |
+        | 0        1  0        0 | x | 0 1 0 0 | x | 0.5 | = | 0.5|
+        | -sin(90) 0  cos(90)  0 |   | 0 0 1 0 |   | 5   |   | 2  |
+        | 0        0  0        1 |   | 0 0 0 1 |   | 1   |   | 1  |
+        
+
+*/
