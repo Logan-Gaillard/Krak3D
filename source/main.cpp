@@ -1,5 +1,6 @@
+#include <glm/ext/matrix_float4x4.hpp>
 #include <glm/ext/matrix_transform.hpp>
-#include <glm/ext/vector_float3_precision.hpp>
+#include <glm/ext/vector_float3.hpp>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -27,7 +28,7 @@ struct Options {
 };
 
 struct camera {
-    glm::vec3 position = glm::vec3(3, 3, 1); //Position de la caméra
+    glm::vec3 position = glm::vec3(0, 2,5); //Position de la caméra
     glm::vec3 direction = glm::vec3(0, 0, 0); //La direction où regarde la caméra
     glm::vec3 up = vec3(0, 1, 0);
 };
@@ -88,27 +89,103 @@ int main(){
         0.0f, 1.0f, 0.0f, //Vertex supérieur
     };
 
-    //Création d'un VBO
-    //Création d'une mémoire tampon pour le triangle
-    GLuint vertexBuffer; //Identifiant de notre Vertex Buffer Object
+    //On créer un cube et on positionne ses sommets
+    static const GLfloat cube_vertex_buffer_data[] = {
+        -1.0f, -1.0f, -1.0f, //Triangle 1
+        -1.0f, -1.0f, 1.0f,
+        -1.0f, 1.0f, 1.0f,
+        1.0f, 1.0f, -1.0f, //Triangle 2
+        -1.0f, -1.0f, -1.0f,
+        -1.0f, 1.0f, -1.0f,
+        1.0f, -1.0f, 1.0f, //Triangle 3
+        -1.0f, -1.0f, -1.0f,
+        1.0f, -1.0f, -1.0f,
+        1.0f, 1.0f, -1.0f, //Triangle 4
+        1.0f, -1.0f, -1.0f,
+        -1.0f, -1.0f, -1.0f,
+        -1.0f, -1.0f, -1.0f, //Triangle 5
+        -1.0f, 1.0f, 1.0f,
+        -1.0f, 1.0f, -1.0f,
+        1.0f, -1.0f, 1.0f, //Triangle 6
+        -1.0f, -1.0f, 1.0f,
+        -1.0f, -1.0f, -1.0f,
+        -1.0f, 1.0f, 1.0f, //Triangle 7
+        -1.0f, -1.0f, 1.0f,
+        1.0f, -1.0f, 1.0f,
+        1.0f, 1.0f, 1.0f, //Triangle 8
+        1.0f, -1.0f, -1.0f,
+        1.0f, 1.0f, -1.0f,
+        1.0f, -1.0f, -1.0f, //Triangle 9
+        1.0f, 1.0f, 1.0f,
+        1.0f, -1.0f, 1.0f,
+        1.0f, 1.0f, 1.0f, //Triangle 10
+        1.0f, 1.0f, -1.0f,
+        -1.0f, 1.0f, -1.0f,
+        1.0f, 1.0f, 1.0f, //Triangle 11
+        -1.0f, 1.0f, -1.0f,
+        -1.0f, 1.0f, 1.0f,
+        1.0f, 1.0f, 1.0f, //Triangle 12
+        -1.0f, 1.0f, 1.0f,
+        1.0f, -1.0f, 1.0f
+    };
+
+    static GLfloat cube_color_buffer_data[12*3*3];
+    for(int vtx = 0; vtx < 12*3; vtx++){
+        cube_color_buffer_data[vtx*3] = (float)rand() / (float)RAND_MAX;
+        cube_color_buffer_data[vtx*3+1] = (float)rand() / (float)RAND_MAX;
+        cube_color_buffer_data[vtx*3+2] = (float)rand() / (float)RAND_MAX;
+    }
+
+    printf("Cube color buffer data : %f %f %f\n", cube_color_buffer_data[0], cube_color_buffer_data[1], cube_color_buffer_data[2]);
+
+    static const GLfloat triangle_color_buffer_data[] = {
+        1.0f, 0, 0,
+        0, 1.0f, 0,
+        0, 0, 1.0f
+    };
+
+    //Création d'un VBO pour le cube
+    //Création d'une mémoire tampon pour le cube
+    GLuint cubeVertexBuffer; //Identifiant de notre Vertex Buffer Object
     glGenBuffers( //On crée un VBO
         1, //Le nombre de VBOs que l'on veut créer
-        &vertexBuffer //L'adresse de la variable qui va stocker l'identifiant du premier VBO créé
+        &cubeVertexBuffer //L'adresse de la variable qui va stocker l'identifiant du premier VBO créé
     );
 
     // On lie ce VBO courant
     glBindBuffer(
         GL_ARRAY_BUFFER, // On définit le VBO comme un VBO de type GL_ARRAY_BUFFER
-        vertexBuffer // On lie vertexbuffer ce VBO pour le rendre actif
+        cubeVertexBuffer // On lie vertexbuffer ce VBO pour le rendre actif
     ); 
 
     glBufferData( // On envoie les données à OpenGL qui va les donner à la carte graphique
         GL_ARRAY_BUFFER, // On définit le VBO comme un VBO de type GL_ARRAY_BUFFER
-        sizeof(triangle_vertex_buffer_data), // On envoie la taille des données
-        triangle_vertex_buffer_data, // On envoie les données
+        sizeof(cube_vertex_buffer_data), // On envoie la taille des données
+        cube_vertex_buffer_data, // On envoie les données
         GL_STATIC_DRAW // On envoie les données une fois et on les utilise souvent
     );
 
+    //Création d'un VBO pour les couleurs
+    GLuint colorBuffer;
+    glGenBuffers(1, &colorBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(cube_color_buffer_data), cube_color_buffer_data, GL_STATIC_DRAW);
+    
+
+    //Création d'un VBO pour le triangle
+    GLuint TriangleVertexBuffer; // Identifiant de notre Vertex Buffer Object
+    glGenBuffers(1, &TriangleVertexBuffer); // Crée un seul Vertex Buffer Object
+    glBindBuffer(GL_ARRAY_BUFFER, TriangleVertexBuffer); // On lie vertexbuffer ce VBO pour le rendre actif
+    glBufferData(GL_ARRAY_BUFFER, sizeof(triangle_vertex_buffer_data), triangle_vertex_buffer_data, GL_STATIC_DRAW); // On envoie les données à OpenGL
+
+    GLuint TriangleColorBuffer;
+    glGenBuffers(1, &TriangleColorBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, TriangleColorBuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(triangle_color_buffer_data), triangle_color_buffer_data, GL_STATIC_DRAW);
+
+
+
+    // Cube
     glm::mat4 proj = glm::perspective( // On crée une matrice de projection qui permet de faire la profondeur de champ
         glm::radians(opts.fov), // L'angle de vue (FOV de 90°)
         (float)opts.screenSize.x / (float)opts.screenSize.y, // Le ratio de la fenêtre
@@ -122,10 +199,14 @@ int main(){
         cam.up // Le haut de la caméra
     );
 
-    glm::mat4 model = glm::mat4(1.0f); // On crée une matrice identité pour le modèle(le 1.0f est la taille de l'objet)
+    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(-3, 0 ,0)); // On crée une matrice identité pour le modèle(le 1.0f est le facteur homogène)
 
-    glm::mat4 mvp = proj * view * model; // On combine les trois matrices en une seule
+    glm::mat4 mvpCube = proj * view * model; // On combine les trois matrices en une seule
     //MVP = Projection, View et Model
+
+    // Triangle
+    model = glm::translate(glm::mat4(1.0f), glm::vec3(3,0,0));
+    glm::mat4 mvpTriangle = proj * view * model;
     
 
     GLuint programID = LoadShaders( "./shaders/SimpleVertexShader.vxs", "./shaders/SimpleFragmentShader.fts" );
@@ -135,6 +216,9 @@ int main(){
         // Clear the screen
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // On efface le tampon de couleur et le tampon de profondeur
 
+        glEnable(GL_DEPTH_TEST); // On active le test de profondeur
+        glDepthFunc(GL_LESS); // Permet 
+
         glUseProgram(programID); // On utilise le programme
 
         GLuint matrixId = glGetUniformLocation(programID, "MVP"); // On récupère l'identifiant de la matrice MVP
@@ -142,14 +226,14 @@ int main(){
             matrixId,
             1, // On envoie une seule matrice
             GL_FALSE, // On ne transpose pas la matrice
-            &mvp[0][0] // On envoie la matrice (&mvp seul égale à toute la matrice si on fait notre premier [0] on obtiens la première ligne de la matrice et [0] de la première ligne)
+            &mvpCube[0][0] // On envoie la matrice (&mvp seul égale à toute la matrice si on fait notre premier [0] on obtiens la première ligne de la matrice et [0] de la première ligne)
         );
 
         //DESSINS
         glEnableVertexAttribArray(0); // Elle permet de dire à OpenGL que l'on va utiliser l'attribut 0
         glBindBuffer(
             GL_ARRAY_BUFFER, // On définit le VBO comme un VBO de type GL_ARRAY_BUFFER
-            vertexBuffer // On lie vertexbuffer ce VBO pour le rendre actif
+            cubeVertexBuffer // On lie vertexbuffer ce VBO pour le rendre actif
         );
 
         glVertexAttribPointer(
@@ -161,12 +245,27 @@ int main(){
             (void*)0 // Offset de la mémoire tampon (On dessiner à la position 0)
         );
 
+        glEnableVertexAttribArray(1); // Elle permet de dire à OpenGL que l'on va utiliser l'attribut 1
+        glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
         glDrawArrays(
             GL_TRIANGLES, // On dessine des triangles
             0, // On commence à partir du sommet 0
-            3 // On dessine 3 sommets
+            12*3 // On dessine 12 triangles (12*3 sommets)
         );
 
+
+        glUniformMatrix4fv(matrixId, 1, GL_FALSE, &mvpTriangle[0][0]);
+
+        glBindBuffer(GL_ARRAY_BUFFER, TriangleVertexBuffer);
+
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+        glEnableVertexAttribArray(1);
+        glBindBuffer(GL_ARRAY_BUFFER, TriangleColorBuffer);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+        glDrawArrays(GL_TRIANGLES, 0, 1*3);
         glDisableVertexAttribArray(0); // On désactive l'attribut 0
         //La modification du dessin du triangles n'est plus faisaible ici
         

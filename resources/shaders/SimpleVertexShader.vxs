@@ -2,6 +2,7 @@
 
 //Déclare les données d'entrées
 layout(location = 0) in vec3 vtxPos_mdlSp;
+layout(location = 1) in vec3 vtxColor;
 
 //layout(location = 0) indique l'emplacement de la variable de position du sommet dans le shader
 // in : indique que la variable est une entrée 
@@ -9,9 +10,10 @@ layout(location = 0) in vec3 vtxPos_mdlSp;
 // vtxPos_mdlSp : nom de la variable
 
 uniform mat4 MVP; //Matrice de transformation
-
+out vec3 fragmentColor; //Variable de sortie
 
 //Fonction appelée pour chaque sommet
 void main(){
     gl_Position = MVP * vec4(vtxPos_mdlSp, 1.0); //Calcul de la position du sommet
+    fragmentColor = vtxColor; //Transmet la couleur du sommet au fragment shader
 }
